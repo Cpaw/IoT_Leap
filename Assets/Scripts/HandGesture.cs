@@ -12,6 +12,8 @@ public class HandGesture : MonoBehaviour {
     private Controller controller = new Controller();   // ジェスチャー検知に必要
     public GameObject[] FingerObjects;
   	WebSocket ws;
+  	float swipeStart=0;
+    float swipeStop=0;
   	
     void Start() {
         // ジェスチャー有効化
@@ -64,6 +66,7 @@ public class HandGesture : MonoBehaviour {
         var fingerCount = frame.Fingers.Count;
         var gestures = frame.Gestures();
         var interactionBox = frame.InteractionBox;
+
  		
         if ( frame.Fingers[0].IsValid ) {
         	 for ( int i = 0; i < FingerObjects.Length; i++ ) {
@@ -105,10 +108,16 @@ public class HandGesture : MonoBehaviour {
                     var screenTapGesture = new ScreenTapGesture(gesture);
                     printGesture("ScreenTap");
                     break;
-                case Gesture.GestureType.TYPE_SWIPE:
-                    var swipeGesture = new SwipeGesture(gesture);
-                    printGesture("Swipe");
-                    break;
+		      	case Gesture.GestureType.TYPESWIPE:
+		      	var swipe = new SwipeGesture(gesture);
+		      	if(swipe.State == Gesture.GestureState.STATESTART){
+		      		swipeStart=swipe.Direction.y;
+		      	}
+		      	if(swipe.State == Gesture.GestureState.STATESTOP){
+		      		swipeStop=swipe.Direction.y;
+		      	}
+		        	Debug.Log(swipe.Direction.y);
+		        break;
                 default:
                     break;
                 }

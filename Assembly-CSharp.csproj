@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\Example.cs" />
+     <Compile Include="Assets\Scripts\HandControll.cs" />
      <Compile Include="Assets\Scripts\HandGesture.cs" />
      <Compile Include="Assets\Scripts\LeapController.cs" />
  <Reference Include="UnityEngine.UI">
