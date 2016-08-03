@@ -94,6 +94,7 @@ public class HandGesture : MonoBehaviour {
 				        {
 				          clockwiseness = "反時計回り";
 				        }
+                        Debug.Log(clockwiseness);
 				        Send(clockwiseness);
                     break;
                 case Gesture.GestureType.TYPEKEYTAP:
