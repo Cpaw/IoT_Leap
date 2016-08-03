@@ -10,7 +10,7 @@ public class HandGesture : MonoBehaviour {
     public Text label;  // 表示用ラベル
     public string WSAddress = "ws://127.0.0.1:3000";
     private Controller controller = new Controller();   // ジェスチャー検知に必要
-  　public GameObject[] FingerObjects;
+    public GameObject[] FingerObjects;
   	WebSocket ws;
   	
     void Start() {
