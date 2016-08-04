@@ -1,0 +1,15 @@
+{
+	"itemList":[
+	{
+		"name": "AB",
+		"price" : 100,
+		"value" : 12
+	}
+	,
+	{
+		"name": "CD",
+		"price" : 150,
+		"value" : 5
+	}
+	]
+}

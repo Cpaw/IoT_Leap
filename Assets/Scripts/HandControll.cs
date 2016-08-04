@@ -12,6 +12,18 @@ public class HandControll : MonoBehaviour {
     private Controller controller = new Controller();   // ジェスチャー検知に必要
     public GameObject[] FingerObjects;
   	WebSocket ws;
+
+    [Serializable] //なくても一応変換はされるが、一部挙動が変になるので必ずつけておくべき
+    public class Item
+    {
+        public string name;
+        public int price;
+        public int value;
+    }
+    [Serializable]
+    public class Items{
+        public Item[] itemList;
+    }
   	
     void Start() {
         // ジェスチャー有効化
@@ -33,6 +45,7 @@ public class HandControll : MonoBehaviour {
         };
         ws.OnMessage += (sender, e) => {
             Debug.Log ("WebSocket Message Type: " + e.Type + ", Data: " + e.Data);
+            GetItem(e.Data);
         };
         ws.OnError += (sender, e) => {
             Debug.Log ("WebSocket Error Message: " + e.Message);
@@ -83,9 +96,39 @@ public class HandControll : MonoBehaviour {
             FingerObjects[0].transform.localPosition = ToVector3( normalizedPosition );
             FingerObjects[0].transform.localPosition = ToVector3( normalizedPosition );
         }
+
+                // ジェスチャー結果取得＆表示
+                Gesture gesture = gestures[0];
+                switch ( gesture.Type ) {
+                case Gesture.GestureType.TYPECIRCLE:
+                    var circle = new CircleGesture(gesture);
+                        // 回転方向を計算
+                        string clockwiseness;
+                if(circle.State == Gesture.GestureState.STATESTOP){
+                    //Debug.Log("stop");
+                    Send("list");
+                }
+                    break;
+                case Gesture.GestureType.TYPEKEYTAP:
+                    var keytapGesture = new KeyTapGesture(gesture);
+                    printGesture("KeyTap");
+                    break;
+                case Gesture.GestureType.TYPESCREENTAP:
+                    var screenTapGesture = new ScreenTapGesture(gesture);
+                    printGesture("ScreenTap");
+                    break;
+                case Gesture.GestureType.TYPESWIPE:
+                var swipe = new SwipeGesture(gesture);
+                    Debug.Log(swipe.Direction.y);
+                break;
+                default:
+                    break;
+
+            }
     }
     void OnTriggerStay(Collider col){
-        Debug.Log(col.gameObject.tag);
+        //Debug.Log(col.gameObject.tag);
+        //Send(col.gameObject.tag);
     }
     // ジェスチャー結果表示
     void printGesture(string str) {
@@ -105,5 +148,15 @@ public class HandControll : MonoBehaviour {
   Vector3 ToVector3( Vector v )
   {
     return new UnityEngine.Vector3( v.x, v.y, v.z );
+  }
+
+  void GetItem(string data){
+        var textAsset = data;
+        string itemJson = textAsset;
+
+        var items = JsonUtility.FromJson<Items>(itemJson);
+        for(int i = 0;i<items.itemList.Length;i++){
+        Debug.Log ("name: " + items.itemList[i].name+" price: "+items.itemList[i].price+"value: "+items.itemList[i].value);
+        }
   }
 }
