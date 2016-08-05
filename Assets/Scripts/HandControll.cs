@@ -12,7 +12,9 @@ public class HandControll : MonoBehaviour {
     private Controller controller = new Controller();   // ジェスチャー検知に必要
     public GameObject[] FingerObjects;
   	WebSocket ws;
-
+    public GameObject UIPanel;
+    PanelSlider panel;
+    bool UIOpened=false;
     [Serializable] //なくても一応変換はされるが、一部挙動が変になるので必ずつけておくべき
     public class Item
     {
@@ -32,6 +34,7 @@ public class HandControll : MonoBehaviour {
         controller.EnableGesture(Gesture.GestureType.TYPESCREENTAP);
         controller.EnableGesture(Gesture.GestureType.TYPE_SWIPE);
         Connect ();
+        panel = UIPanel.GetComponent<PanelSlider>();
     }
 
     void OnApplicationQuit () {
@@ -102,11 +105,29 @@ public class HandControll : MonoBehaviour {
                 switch ( gesture.Type ) {
                 case Gesture.GestureType.TYPECIRCLE:
                     var circle = new CircleGesture(gesture);
-                        // 回転方向を計算
-                        string clockwiseness;
-                if(circle.State == Gesture.GestureState.STATESTOP){
-                    //Debug.Log("stop");
-                    Send("list");
+                    // 回転方向を計算
+                    string clockwiseness;
+                    if (circle.Pointable.Direction.AngleTo(circle.Normal) <= Math.PI / 4)
+                    {
+                      // 角度が90度以下なら、時計回り
+                      clockwiseness = "時計回り";
+                    }
+                    else
+                    {
+                      clockwiseness = "反時計回り";
+                    }
+                    if(circle.State == Gesture.GestureState.STATESTOP){
+                        //Debug.Log("stop");
+                        if(clockwiseness=="時計回り"){
+                                Send("list");
+                                Debug.Log("UIOpen");
+                                UIOpened=true;
+                                panel.SlideIn();
+                        }else{
+                                UIOpened=false;
+                                panel.SlideOut();
+                        }
+
                 }
                     break;
                 case Gesture.GestureType.TYPEKEYTAP:
@@ -127,8 +148,10 @@ public class HandControll : MonoBehaviour {
             }
     }
     void OnTriggerStay(Collider col){
-        //Debug.Log(col.gameObject.tag);
-        //Send(col.gameObject.tag);
+        if(UIOpened==false){
+        Debug.Log(col.gameObject.tag);
+        }
+        Send(col.gameObject.tag);
     }
     // ジェスチャー結果表示
     void printGesture(string str) {
