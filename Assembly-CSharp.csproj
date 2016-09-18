@@ -45,12 +45,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\JSONUtility.cs" />
-     <Compile Include="Assets\PanelSlider.cs" />
      <Compile Include="Assets\Scripts\Example.cs" />
      <Compile Include="Assets\Scripts\HandControll.cs" />
      <Compile Include="Assets\Scripts\HandGesture.cs" />
+     <Compile Include="Assets\Scripts\ItemController.cs" />
+     <Compile Include="Assets\Scripts\JSONUtility.cs" />
      <Compile Include="Assets\Scripts\LeapController.cs" />
+     <Compile Include="Assets\Scripts\PanelSlider.cs" />
+     <Compile Include="Assets\Scripts\ReceiveInterface.cs" />
+     <Compile Include="Assets\Scripts\Reciever.cs" />
      <None Include="Assets\Resources\jsontext.txt" />
      <None Include="Assets\Plugins\Pixelplacement\iTween\ReadMe!\ReadMe!.txt" />
  <Reference Include="UnityEngine.UI">

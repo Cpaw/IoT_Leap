@@ -3,10 +3,11 @@ using UnityEngine.UI;
 using System.Collections;
  
 public class PanelSlider : MonoBehaviour {
-	
+	[SerializeField]
+	private int slideInPos;
     // スライドイン（Pauseボタンが押されたときに、これを呼ぶ）
     public void SlideIn(){
-    	 iTween.MoveTo(gameObject, iTween.Hash ("y", 200, "time", 1.5));
+    	 iTween.MoveTo(gameObject, iTween.Hash ("y", slideInPos, "time", 1.5));
         Debug.Log("SLIDEIN");
     }
  
