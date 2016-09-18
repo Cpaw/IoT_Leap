@@ -10,20 +10,20 @@ using WebSocketSharp.Net;
 public class HandControll : MonoBehaviour {
     public Text label;  // 表示用ラベル
     public string WSAddress = "ws://127.0.0.1:3000";
-    public string WSAddress_DB = "";
+    public string APIAdress = "";
     private Controller controller = new Controller();   // ジェスチャー検知に必要
     public GameObject[] FingerObjects;
   	WebSocket ws;
-  	WebSocket ws_DB;
     public GameObject UIPanel;
     public GameObject[] UIItems;
     public ItemController[] ItemControllers;
     public string[] ItemNames;
     public int[] ItemPrices;
     public int[] ItemValues;
-    bool UIOn;
+    bool UIOn=false;
     PanelSlider panel;
     bool UIOpened=false;
+    RawImage ItemImage;
     [Serializable] //なくても一応変換はされるが、一部挙動が変になるので必ずつけておくべき
     public class Item
     {
@@ -44,6 +44,8 @@ public class HandControll : MonoBehaviour {
         controller.EnableGesture(Gesture.GestureType.TYPE_SWIPE);
         Connect ();
         panel = UIPanel.GetComponent<PanelSlider>();
+        StartCoroutine(GetItems(APIAdress));
+        //StartCoroutine(GetItemImage("http://localhost:2000/images/Orange.jpg"));
     }
 
     void OnApplicationQuit () {
@@ -52,51 +54,29 @@ public class HandControll : MonoBehaviour {
 
     void Connect () {
         ws = new WebSocket (WSAddress);
-        ws_DB = new WebSocket(WSAddress);
 
         ws.OnOpen += (sender, e) => {
-            Debug.Log ("WebSocket Open");
+            //Debug.Log ("WebSocket Open");
         };
         ws.OnMessage += (sender, e) => {
-            Debug.Log ("WebSocket Message Type: " + e.Type + ", Data: " + e.Data);
+            //Debug.Log ("WebSocket Message Type: " + e.Type + ", Data: " + e.Data);
         };
         ws.OnError += (sender, e) => {
-            Debug.Log ("WebSocket Error Message: " + e.Message);
+            //Debug.Log ("WebSocket Error Message: " + e.Message);
         };
         ws.OnClose += (sender, e) => {
-            Debug.Log ("WebSocket Close");
+            //Debug.Log ("WebSocket Close");
         };
         ws.Connect ();
-
-        ws_DB.OnOpen += (sender, e) => {
-            Debug.Log ("WebSocket Open");
-        };
-        ws_DB.OnMessage += (sender, e) => {
-            Debug.Log ("WebSocket Message Type: " + e.Type + ", Data: " + e.Data);
-            GetItem(e.Data);
-        };
-        ws_DB.OnError += (sender, e) => {
-            Debug.Log ("WebSocket Error Message: " + e.Message);
-        };
-        ws_DB.OnClose += (sender, e) => {
-            Debug.Log ("WebSocket Close");
-        };
-        ws_DB.Connect ();
-        ws_DB.Send("");
     }
 
     void Disconnect () {
         ws.Close ();
         ws = null;
-        ws_DB.Close ();
-        ws_DB = null;
     }
 
     void Send (string message) {
         ws.Send (message);
-    }
-    void Send_DB(string message){
-    	ws_DB.Send(message);
     }
  
     void Update() {
@@ -154,7 +134,6 @@ public class HandControll : MonoBehaviour {
                     if(circle.State == Gesture.GestureState.STATESTOP){
                         //Debug.Log("stop");
                         if(clockwiseness=="時計回り"){
-                                Send_DB("");
                                 Debug.Log("UIOpen");
                                 UIOpened=true;
                                 panel.SlideIn();
@@ -184,7 +163,7 @@ public class HandControll : MonoBehaviour {
     }
     void OnTriggerStay(Collider col){
         if(UIOpened==false){
-        Debug.Log(col.gameObject.tag);
+        //Debug.Log(col.gameObject.tag);
         }
         Send(col.gameObject.tag);
     }
@@ -208,7 +187,7 @@ public class HandControll : MonoBehaviour {
     return new UnityEngine.Vector3( v.x, v.y, v.z );
   }
 
-  void GetItem(string data){
+  void ParseJSON(string data){
         var textAsset = data;
         string itemJson = textAsset;
         var items = JsonUtility.FromJson<Items>(itemJson);
@@ -218,9 +197,34 @@ public class HandControll : MonoBehaviour {
         ItemPrices[i] = items.itemList[i].price;
         ItemValues[i] = items.itemList[i].value;
         UIOn=true;
-        ItemControllers[0].test(WSAddress_DB+"/images/Orange.jpg");
+        ItemControllers[i].test(APIAdress+"/images/"+items.itemList[i].name+".jpg");
         //ItemControllers[i].SetItem(items.itemList[i].name,items.itemList[i].price,items.itemList[i].value);
         //ExecuteEvents.Executeを使ってメソッド実行
         }
   }
+  private IEnumerator GetItemImage(string url) {
+		//現在地マーカーはここの「&markers」以下で編集可能
+     	Debug.Log(url);
+
+		WWW www = new WWW(url);
+		yield return www;
+		if (!string.IsNullOrEmpty(www.error)) { // ダウンロードでエラーが発生した
+            Debug.Log(www.error);
+        }
+        ItemImage.texture = www.texture;
+ 		ItemImage.material.mainTexture = www.texture;
+ 		ItemImage.color = new Color(ItemImage.color.r, ItemImage.color.g, ItemImage.color.b, 1f);
+ 	}
+
+	private IEnumerator GetItems(string url) {
+		//現在地マーカーはここの「&markers」以下で編集可能
+     	Debug.Log(url);
+		WWW www = new WWW(url);
+		yield return www;
+		if (!string.IsNullOrEmpty(www.error)) { // ダウンロードでエラーが発生した
+            Debug.Log(www.error);
+        }
+        Debug.Log(www.text);
+        ParseJSON(www.text);
+ 	}
 }
